@@ -1,0 +1,118 @@
+﻿using System;
+using System.Data.Common;
+using System.Data.SqlClient;
+
+namespace userrights
+{
+    public class DataSourceInterfacer
+    {
+        private readonly string _connString;
+        private readonly string _prefix;
+
+        public DataSourceInterfacer(string connectionSring, string prefix = "")
+        {
+            _connString = connectionSring;
+            _prefix = prefix;
+        }
+
+        public bool TablesExist()
+        {
+            return DoesIndividualDbTableExists("right") && DoesIndividualDbTableExists("userright");
+        }
+
+        public void BuildTables()
+        {
+            CreateTable("right");
+            CreateTable("userright");
+        }
+
+        private SqlConnection _connection;
+        internal SqlConnection Connection
+        {
+            get
+            {
+                if (_connection == null)
+                {
+                    _connection = new SqlConnection(_connString);
+                }
+                return _connection;
+            }
+        }
+
+        /// <summary>
+        /// Get the actual table name based on the root name of the table
+        /// </summary>
+        /// <param name="root"></param>
+        /// <returns></returns>
+        private string GetTableName(string root)
+        {
+            return string.Format("{0}{1}", _prefix, root);
+        }
+
+        /// <summary>
+        /// generates the query to determine if a table exists
+        /// </summary>
+        /// <param name="tableRootName"></param>
+        /// <returns></returns>
+        private string GenerateQueryForTableExistence(string tableRootName)
+        {
+            return string.Format(@"
+                SELECT COUNT(*) 
+                FROM INFORMATION_SCHEMA.TABLES 
+                WHERE TABLE_SCHEMA = 'dbo' 
+                AND  TABLE_NAME = '" + GetTableName(tableRootName) + "'");
+        }
+
+        /// <summary>
+        /// return true if the table exists, false if otherwise
+        /// </summary>
+        /// <param name="tableRootName"></param>
+        /// <returns></returns>
+        private bool DoesIndividualDbTableExists(string tableRootName)
+        {
+            string query = GenerateQueryForTableExistence(tableRootName);
+            SqlCommand cmd = new SqlCommand(query, this.Connection);
+            return ((int) cmd.ExecuteScalar()) > 0;
+        }
+
+        private string GenerateQueryToCreateTable(string tableRootName)
+        {
+            tableRootName = tableRootName.ToLowerInvariant();
+            string query;
+
+            if (tableRootName.Equals("right"))
+            {
+                query = @"                    
+                    CREATE TAbLE [Right](
+	                    RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	                    Category		VARCHAR(200),
+	                    [Name]			VARCHAR(200) NOT NULL
+                    )";
+            }
+            else if (tableRootName.Equals("userright"))
+            {
+                query = @"
+                    CREATE TABLE UserRight(
+	                    UserRightId		INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
+	                    RightId			INT NOT NULL,
+	                    UserId			INT NOT NULL,
+	                    [Value]			BIT NULL,
+	                    FOREIGN KEY(RightId) REFERENCES [Right](RightId)
+                    )";
+            }
+            else
+            {
+                throw new Exception(string.Format("table name '{0}' not recognized", GetTableName(tableRootName)));
+            }
+
+            return query;
+        }
+
+        private void CreateTable(string tableRootName)
+        {
+            string commandText = GenerateQueryToCreateTable(tableRootName);
+            SqlCommand cmd = new SqlCommand(commandText, this.Connection);
+            cmd.ExecuteNonQuery();
+        }
+    }
+}
