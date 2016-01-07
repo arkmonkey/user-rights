@@ -83,7 +83,7 @@ namespace userrights
             if (tableRootName.Equals("right"))
             {
                 query = @"                    
-                    CREATE TAbLE [Right](
+                    CREATE TABLE [Right](
 	                    RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY,
 	                    Category		VARCHAR(200),
 	                    [Name]			VARCHAR(200) NOT NULL
@@ -94,10 +94,10 @@ namespace userrights
                 query = @"
                     CREATE TABLE UserRight(
 	                    UserRightId		INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
-	                    RightId			INT NOT NULL,
-	                    UserId			INT NOT NULL,
-	                    [Value]			BIT NULL,
-	                    FOREIGN KEY(RightId) REFERENCES [Right](RightId)
+	                    RightCategory	VARCHAR(200) NULL,
+                        RightName       VARCHAR(200) NOT NULL,
+	                    ContextId		INT NOT NULL,
+	                    [Value]			BIT NULL
                     )";
             }
             else
