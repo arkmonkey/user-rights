@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace userrights
 {
@@ -11,6 +7,11 @@ namespace userrights
     /// </summary>
     internal class DbQueryHelper
     {
+        public static class TableNames
+        {
+            public const string RIGHT = "Right";
+            public const string USERRIGHT = "UserRight";
+        }
         private readonly string _prefix;
 
         public DbQueryHelper(string prefix)
@@ -49,17 +50,34 @@ namespace userrights
 
         internal string GetUpdateOneQuery(int userId, Right right, bool value)
         {
-            //TODO: for testing
             return string.Format("IF(EXISTS(SELECT * FROM {0} WHERE ContextId = {1} AND {2}))" +
                                  "UPDATE {0} SET Value = {3} WHERE ContextId = {1} AND {2} " +
                                  "ELSE" +
                                  "INSERT {0}(RightCategory, RightName, ContextId, Value) VALUES({4}, {5}, {1}, {3}) ",
-                                 GetTableName("UserRight"),     //{0}
+                                 GetTableName(TableNames.USERRIGHT),     //{0}
                                  userId,                        //{1}
                                  GetRightFilter(right),         //{2}
                                  value,                         //{3}
                                  right.Category,                //{4}
                                  right.Name);                   //{5}
         }
+
+        internal string GetUserRightQuery(int id, Right right)
+        {
+            string query = string.Format("SELECT * FROM {0} WHERE ContextId = {1} AND {2}"
+                , GetTableName(TableNames.USERRIGHT)
+                , id
+                , GetRightFilter(right));
+            return query;
+        }
+
+        internal string GetUserRightsQuery(int id)
+        {
+            string query = string.Format("SELECT * FROM {0} WHERE ContextId = {1}"
+                , GetTableName(TableNames.USERRIGHT)
+                , id);
+            return query;
+        }
+
     }
 }

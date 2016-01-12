@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Data.Common;
 using System.Data.SqlClient;
 
 namespace userrights
@@ -14,6 +13,8 @@ namespace userrights
             _connString = connectionSring;
             _prefix = prefix;
         }
+
+        public string Prefix { get { return _prefix; } }
 
         public bool TablesExist()
         {
@@ -82,23 +83,23 @@ namespace userrights
 
             if (tableRootName.Equals("right"))
             {
-                query = @"                    
-                    CREATE TABLE [Right](
-	                    RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY,
-	                    Category		VARCHAR(200),
-	                    [Name]			VARCHAR(200) NOT NULL
-                    )";
+                query = string.Format(" " +
+                    "CREATE TABLE [{0}](" +
+	                    "RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY," +
+	                    "Category		    VARCHAR(200)," + 
+	                    "[Name]			    VARCHAR(200) NOT NULL" +
+                    ")", GetTableName("Right"));
             }
             else if (tableRootName.Equals("userright"))
             {
-                query = @"
-                    CREATE TABLE UserRight(
-	                    UserRightId		INT NOT NULL IDENTITY(1,1) PRIMARY KEY,
-	                    RightCategory	VARCHAR(200) NULL,
-                        RightName       VARCHAR(200) NOT NULL,
-	                    ContextId		INT NOT NULL,
-	                    [Value]			BIT NULL
-                    )";
+                query = string.Format(" " +
+                    "CREATE TABLE {0}(" +
+	                    "UserRightId		INT NOT NULL IDENTITY(1,1) PRIMARY KEY," +
+	                    "RightCategory	    VARCHAR(200) NULL," +
+                        "RightName          VARCHAR(200) NOT NULL," +
+	                    "ContextId		    INT NOT NULL," +
+	                    "[Value]			BIT NULL" +
+                    ")", GetTableName("UserRight"));
             }
             else
             {

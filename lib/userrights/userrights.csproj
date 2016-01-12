@@ -40,10 +40,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DataSourceInterfacer.cs" />
+    <Compile Include="DbQueryHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Right.cs" />
     <Compile Include="Facade.cs" />
-    <Compile Include="ContextRight.cs" />
+    <Compile Include="UserRight.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

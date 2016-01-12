@@ -1,6 +1,7 @@
 ﻿
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 
 namespace userrights
 {
@@ -14,22 +15,38 @@ namespace userrights
     public class Facade
     {
         private readonly DataSourceInterfacer _dbInterfacer;
+        private readonly DbQueryHelper _queryHelper;
 
         public Facade(DataSourceInterfacer dbInterfacer)
         {
             _dbInterfacer = dbInterfacer;
+            _queryHelper = new DbQueryHelper(_dbInterfacer.Prefix);
         }
 
         #region Public Methods
         /// <summary>
         /// Get one right of a user/role
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="right"></param>
         /// <returns></returns>
-        public ContextRight GetContextRight(int Id, Right right)
+        public UserRight GetRight(int id, Right right)
         {
-            throw new NotImplementedException();
+            string query = _queryHelper.GetUserRightQuery(id, right);
+
+            
+            SqlCommand cmd = new SqlCommand(query, _dbInterfacer.Connection);
+            var reader = cmd.ExecuteReader();
+
+            if (reader.HasRows)
+            {
+                bool val = (bool) reader["Value"];
+                return new UserRight { Id = id, Right = right, Value = val };
+            }
+            else
+            {
+                return new UserRight { Id = id, Right = right, Value = false };
+            }
         }
 
         /// <summary>
@@ -37,7 +54,7 @@ namespace userrights
         /// </summary>
         /// <param name="Id"></param>
         /// <returns></returns>
-        public List<ContextRight> GetContextRights(int Id)
+        public List<UserRight> GetRights(int Id)
         {
             throw new NotImplementedException();
         }
@@ -48,7 +65,7 @@ namespace userrights
         /// <param name="Id"></param>
         /// <param name="rightsList"></param>
         /// <returns></returns>
-        public List<ContextRight> GetContextRights(int Id, List<Right> rightsList)
+        public List<UserRight> GetRights(int Id, List<Right> rightsList)
         {
             throw new NotImplementedException();
         }
@@ -56,12 +73,15 @@ namespace userrights
         /// <summary>
         /// Enable/disable a user's/role's right
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="right"></param>
         /// <param name="value"></param>
-        public void SetContextRight(int Id, Right right, bool value)
+        public void SetRight(int id, Right right, bool value)
         {
-            throw new NotImplementedException();
+            string query = _queryHelper.GetUpdateOneQuery(id, right, value);
+
+            SqlCommand cmd = new SqlCommand(query, _dbInterfacer.Connection);
+            cmd.ExecuteNonQuery();
         }
 
         /// <summary>
@@ -69,26 +89,14 @@ namespace userrights
         /// </summary>
         /// <param name="Id"></param>
         /// <param name="contextRightsList"></param>
-        public void SetContextRights(int Id, List<ContextRight> contextRightsList)
+        public void SetRights(int Id, List<UserRight> contextRightsList)
         {
             throw new NotImplementedException();
         }
 
         #endregion //Public Methods
 
-        private static class Queries
-        {
-
-            
-            public static string GetUpdateOneQuery(int userId, Right right, bool value)
-            {
-                return string.Format("IF(EXISTS(SELECT * FROM {0} WHERE ContextId = {1} AND {2}))" +
-                                     "UPDATE {0} SET Value = {3} WHERE ContextId = {1} AND {2} " +
-                                     "ELSE" +
-                                     "INSERT {0}(RightCategory, RightName, ContextId, Value) VALUES({4}, {5}, {1}, {6}) ",
-                                     );
-            }
-        }
+        
 
     }
 }
