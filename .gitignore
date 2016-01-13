@@ -3,3 +3,4 @@ lib/userrights/bin/
 console/obj/
 console/bin/
 *.suo
+*.user
