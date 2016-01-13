@@ -29,21 +29,23 @@ namespace userrights
         /// and so that has to be taken into account.
         /// </summary>
         /// <param name="right"></param>
+        /// <param name="tableAlias">this is the alias in the query</param>
         /// <returns></returns>
-        internal string GetRightFilter(Right right)
+        internal string GetRightFilter(Right right, string tableAlias = "")
         {
             StringBuilder sb = new StringBuilder();
-
+            if (!string.IsNullOrWhiteSpace(tableAlias)) { tableAlias = tableAlias + "."; }
+            
             if (string.IsNullOrEmpty(right.Category))
             {
-                sb.AppendFormat(" RightCategory IS NULL ");
+                sb.AppendFormat(" {0}RightCategory IS NULL ", tableAlias);
             }
             else
             {
-                sb.AppendFormat(" RightCategory = '{0}' ", right.Category);
+                sb.AppendFormat(" {1}RightCategory = '{0}' ", right.Category, tableAlias);
             }
 
-            sb.AppendFormat(" AND RightName = '{0} ", right.Name);
+            sb.AppendFormat(" AND {1}RightName = '{0}' ", right.Name, tableAlias);
 
             return sb.ToString();
         }
@@ -54,26 +56,32 @@ namespace userrights
                                  "UPDATE {0} SET Value = {3} WHERE ContextId = {1} AND {2} " +
                                  "ELSE" +
                                  "INSERT {0}(RightCategory, RightName, ContextId, Value) VALUES({4}, {5}, {1}, {3}) ",
-                                 GetTableName(TableNames.USERRIGHT),     //{0}
-                                 userId,                        //{1}
-                                 GetRightFilter(right),         //{2}
-                                 value,                         //{3}
-                                 right.Category,                //{4}
-                                 right.Name);                   //{5}
+                                 GetTableName(TableNames.USERRIGHT),    //{0}
+                                 userId,                                //{1}
+                                 GetRightFilter(right),                 //{2}
+                                 value,                                 //{3}
+                                 right.Category,                        //{4}
+                                 right.Name);                           //{5}
         }
 
         internal string GetUserRightQuery(int id, Right right)
         {
-            string query = string.Format("SELECT * FROM {0} WHERE ContextId = {1} AND {2}"
+            string query = string.Format("SELECT r.Category, r.[Name], ur.[Value] " +
+                "FROM {0} r LEFT JOIN {1} ur ON r.RightCategory=ur.RightCategory AND r.RightName=ur.RightName " + 
+                "WHERE ContextId = {2} AND {3}"
+                , GetTableName(TableNames.RIGHT)
                 , GetTableName(TableNames.USERRIGHT)
                 , id
-                , GetRightFilter(right));
+                , GetRightFilter(right, "r"));
             return query;
         }
 
         internal string GetUserRightsQuery(int id)
         {
-            string query = string.Format("SELECT * FROM {0} WHERE ContextId = {1}"
+            string query = string.Format("SELECT r.Category, r.[Name], ur.[Value] " +
+                "FROM {0} r LEFT JOIN {1} ur ON r.RightCategory=ur.RightCategory AND r.RightName=ur.RightName " +
+                "WHERE ContextId = {2}"
+                , GetTableName(TableNames.RIGHT)
                 , GetTableName(TableNames.USERRIGHT)
                 , id);
             return query;

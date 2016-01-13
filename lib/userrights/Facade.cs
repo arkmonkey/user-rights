@@ -40,11 +40,15 @@ namespace userrights
 
             if (reader.HasRows)
             {
-                bool val = (bool) reader["Value"];
+                reader.Read();
+                bool val = (reader.IsDBNull(2) ? false : reader.GetBoolean(2));
                 return new UserRight { Id = id, Right = right, Value = val };
             }
             else
             {
+                //if code got here most likely cause: 
+                //  no such right in the "Right" table.
+                //  no such user
                 return new UserRight { Id = id, Right = right, Value = false };
             }
         }
@@ -52,20 +56,51 @@ namespace userrights
         /// <summary>
         /// Get entire list of user's/role's rights 
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <returns></returns>
-        public List<UserRight> GetRights(int Id)
+        public List<UserRight> GetRights(int id)
         {
-            throw new NotImplementedException();
+            string query = _queryHelper.GetUserRightsQuery(id);
+
+            SqlCommand cmd = new SqlCommand(query, _dbInterfacer.Connection);
+            var reader = cmd.ExecuteReader();
+
+            List<UserRight> userRightsList = new List<UserRight>();
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    bool val = (reader.IsDBNull(2) ? false : reader.GetBoolean(2));
+                    userRightsList.Add(new UserRight
+                    {
+                        Id = id, 
+                        Right = new Right
+                        {
+                            Category = reader["RightCategory"].ToString(),
+                            Name = reader["RightName"].ToString()
+                        }, 
+                        Value = val
+                    });
+                }
+                
+            }
+            else
+            {
+                //if code got here most likely cause: 
+                //  no such right in the "Right" table.
+                //  no such user
+            }
+
+            return userRightsList;
         }
 
         /// <summary>
         /// Get list of user's/role's rights based on a specified list of (independent) rights
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="rightsList"></param>
         /// <returns></returns>
-        public List<UserRight> GetRights(int Id, List<Right> rightsList)
+        public List<UserRight> GetRights(int id, List<Right> rightsList)
         {
             throw new NotImplementedException();
         }
@@ -87,9 +122,9 @@ namespace userrights
         /// <summary>
         /// Mass setting of rights for a user/role
         /// </summary>
-        /// <param name="Id"></param>
+        /// <param name="id"></param>
         /// <param name="contextRightsList"></param>
-        public void SetRights(int Id, List<UserRight> contextRightsList)
+        public void SetRights(int id, List<UserRight> contextRightsList)
         {
             throw new NotImplementedException();
         }

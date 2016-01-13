@@ -86,8 +86,8 @@ namespace userrights
                 query = string.Format(" " +
                     "CREATE TABLE [{0}](" +
 	                    "RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY," +
-	                    "Category		    VARCHAR(200)," + 
-	                    "[Name]			    VARCHAR(200) NOT NULL" +
+	                    "RightCategory		VARCHAR(200)," + 
+	                    "RightName			VARCHAR(200) NOT NULL" +
                     ")", GetTableName("Right"));
             }
             else if (tableRootName.Equals("userright"))
