@@ -1,6 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace userrights
@@ -44,13 +42,11 @@ namespace userrights
                 bool val = (reader.IsDBNull(2) ? false : reader.GetBoolean(2));
                 return new UserRight { Id = id, Right = right, Value = val };
             }
-            else
-            {
-                //if code got here most likely cause: 
-                //  no such right in the "Right" table.
-                //  no such user
-                return new UserRight { Id = id, Right = right, Value = false };
-            }
+            
+            //if code got here most likely cause: 
+            //  no such right in the "Right" table.
+            //  no such user
+            return new UserRight { Id = id, Right = right, Value = false };
         }
 
         /// <summary>
@@ -84,12 +80,6 @@ namespace userrights
                 }
                 
             }
-            else
-            {
-                //if code got here most likely cause: 
-                //  no such right in the "Right" table.
-                //  no such user
-            }
 
             return userRightsList;
         }
@@ -102,7 +92,32 @@ namespace userrights
         /// <returns></returns>
         public List<UserRight> GetRights(int id, List<Right> rightsList)
         {
-            throw new NotImplementedException();
+            string query = _queryHelper.GetUserRightsQuery(id, rightsList);
+
+            SqlCommand cmd = new SqlCommand(query, _dbInterfacer.Connection);
+            var reader = cmd.ExecuteReader();
+
+            List<UserRight> userRightsList = new List<UserRight>();
+            if (reader.HasRows)
+            {
+                while (reader.Read())
+                {
+                    bool val = (reader.IsDBNull(2) ? false : reader.GetBoolean(2));
+                    userRightsList.Add(new UserRight
+                    {
+                        Id = id,
+                        Right = new Right
+                        {
+                            Category = reader["RightCategory"].ToString(),
+                            Name = reader["RightName"].ToString()
+                        },
+                        Value = val
+                    });
+                }
+
+            }
+
+            return userRightsList;
         }
 
         /// <summary>
@@ -117,16 +132,6 @@ namespace userrights
 
             SqlCommand cmd = new SqlCommand(query, _dbInterfacer.Connection);
             cmd.ExecuteNonQuery();
-        }
-
-        /// <summary>
-        /// Mass setting of rights for a user/role
-        /// </summary>
-        /// <param name="id"></param>
-        /// <param name="contextRightsList"></param>
-        public void SetRights(int id, List<UserRight> contextRightsList)
-        {
-            throw new NotImplementedException();
         }
 
         #endregion //Public Methods
