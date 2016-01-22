@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 
 namespace userrights
 {
@@ -34,6 +35,7 @@ namespace userrights
         internal string GetRightFilter(Right right, string tableAlias = "")
         {
             StringBuilder sb = new StringBuilder();
+            sb.Append("(");
             if (!string.IsNullOrWhiteSpace(tableAlias)) { tableAlias = tableAlias + "."; }
             
             if (string.IsNullOrEmpty(right.Category))
@@ -46,6 +48,7 @@ namespace userrights
             }
 
             sb.AppendFormat(" AND {1}RightName = '{0}' ", right.Name, tableAlias);
+            sb.Append(")");
 
             return sb.ToString();
         }
@@ -84,6 +87,28 @@ namespace userrights
                 , GetTableName(TableNames.RIGHT)
                 , GetTableName(TableNames.USERRIGHT)
                 , id);
+            return query;
+        }
+
+        internal string GetUserRightsQuery(int id, List<Right> rights)
+        {
+            // build the where clause for the rights based on the List<Right> passed
+            List<string> rightsWhereClause = new List<string>();
+            foreach (Right r in rights)
+            {
+                rightsWhereClause.Add(GetRightFilter(r, "r"));
+            }
+            string resultingRightsWhereClause = rightsWhereClause.Count > 0
+                ? string.Join(" OR ", rightsWhereClause)
+                : "1";
+
+            string query = string.Format("SELECT r.Category, r.[Name], ur.[Value] " +
+                "FROM {0} r LEFT JOIN {1} ur ON r.RightCategory=ur.RightCategory AND r.RightName=ur.RightName " +
+                "WHERE ContextId = {2} AND ({3})"
+                , GetTableName(TableNames.RIGHT)
+                , GetTableName(TableNames.USERRIGHT)
+                , id
+                , resultingRightsWhereClause);
             return query;
         }
 
