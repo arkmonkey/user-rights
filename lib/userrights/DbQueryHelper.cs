@@ -47,16 +47,16 @@ namespace userrightslib
             tableRootName = tableRootName.ToLowerInvariant();
             string query;
 
-            if (tableRootName.Equals("right"))
+            if (tableRootName.Equals(TableNames.RIGHT.ToLowerInvariant()))
             {
                 query = string.Format(" " +
                     "CREATE TABLE [{0}](" +
                         "RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY," +
                         "RightCategory		VARCHAR(200)," +
                         "RightName			VARCHAR(200) NOT NULL" +
-                    ")", GetTableName("Right"));
+                    ")", GetTableName(TableNames.RIGHT));
             }
-            else if (tableRootName.Equals("userright"))
+            else if (tableRootName.Equals(TableNames.USERRIGHT.ToLowerInvariant()))
             {
                 query = string.Format(" " +
                     "CREATE TABLE {0}(" +
@@ -65,7 +65,7 @@ namespace userrightslib
                         "RightName          VARCHAR(200) NOT NULL," +
                         "ContextId		    INT NOT NULL," +
                         "[Value]			BIT NULL" +
-                    ")", GetTableName("UserRight"));
+                    ")", GetTableName(TableNames.USERRIGHT));
             }
             else
             {
