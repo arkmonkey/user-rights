@@ -1,5 +1,5 @@
 ﻿
-namespace userrights
+namespace userrightslib
 {
     /// <summary>
     /// Represents a right of a specific ID/Role

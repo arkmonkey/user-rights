@@ -7,8 +7,8 @@
     <ProjectGuid>{DC4259ED-1963-4B71-B58E-3E7F7BD56222}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>userrights</RootNamespace>
-    <AssemblyName>userrights</AssemblyName>
+    <RootNamespace>userrightslib</RootNamespace>
+    <AssemblyName>userrightslib</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

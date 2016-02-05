@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
 
-namespace userrights
+namespace userrightslib
 {
     /// <summary>
     /// This is the main class that consumers will see and use most often.  

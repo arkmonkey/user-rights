@@ -1,7 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 
-namespace userrights
+namespace userrightslib
 {
     /// <summary>
     /// Helps out creating queries
@@ -25,6 +26,57 @@ namespace userrights
             return string.Format("{0}{1}", _prefix, tableName);
         }
 
+        #region DB tables-related
+        /// <summary>
+        /// generates the query to determine if a table exists
+        /// </summary>
+        /// <param name="tableRootName"></param>
+        /// <returns></returns>
+        internal string GenerateQueryForTableExistence(string tableRootName)
+        {
+            return string.Format(@"
+                SELECT COUNT(*) 
+                FROM INFORMATION_SCHEMA.TABLES 
+                WHERE TABLE_SCHEMA = 'dbo' 
+                AND  TABLE_NAME = '" + GetTableName(tableRootName) + "'");
+        }
+
+
+        internal string GenerateQueryToCreateTable(string tableRootName)
+        {
+            tableRootName = tableRootName.ToLowerInvariant();
+            string query;
+
+            if (tableRootName.Equals("right"))
+            {
+                query = string.Format(" " +
+                    "CREATE TABLE [{0}](" +
+                        "RightId			INT	NOT NULL IDENTITY(1,1) PRIMARY KEY," +
+                        "RightCategory		VARCHAR(200)," +
+                        "RightName			VARCHAR(200) NOT NULL" +
+                    ")", GetTableName("Right"));
+            }
+            else if (tableRootName.Equals("userright"))
+            {
+                query = string.Format(" " +
+                    "CREATE TABLE {0}(" +
+                        "UserRightId		INT NOT NULL IDENTITY(1,1) PRIMARY KEY," +
+                        "RightCategory	    VARCHAR(200) NULL," +
+                        "RightName          VARCHAR(200) NOT NULL," +
+                        "ContextId		    INT NOT NULL," +
+                        "[Value]			BIT NULL" +
+                    ")", GetTableName("UserRight"));
+            }
+            else
+            {
+                throw new Exception(string.Format("table name '{0}' not recognized", GetTableName(tableRootName)));
+            }
+
+            return query;
+        }
+        #endregion //DB tables-related
+
+        #region Rights-Related
         /// <summary>
         /// This is a helper to make it easy to generate the filter for Rights.  Category field could be null, 
         /// and so that has to be taken into account.
@@ -111,6 +163,8 @@ namespace userrights
                 , resultingRightsWhereClause);
             return query;
         }
+
+        #endregion //Rights-related
 
     }
 }
